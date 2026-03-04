@@ -744,50 +744,18 @@ export default function App() {
                   />
                 </div>
                 {allTags.length > 0 && (
-                  <div style={{ display: "flex", gap: "6px", marginTop: "14px", flexWrap: "wrap", alignItems: "center" }}>
-                    <button onClick={() => setActiveFilter("all")} style={{
-                      padding: "7px 16px",
-                      background: activeFilter === "all" ? "linear-gradient(135deg, #2d2a26, #3d3832)" : "rgba(255,255,255,0.5)",
-                      color: activeFilter === "all" ? "#faf8f5" : "#8a827a",
-                      border: activeFilter === "all" ? "none" : "1px solid rgba(0,0,0,0.05)",
-                      borderRadius: "20px", fontFamily: "'DM Sans', sans-serif",
-                      fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                      transition: "all 0.25s ease",
-                    }}>all</button>
-                    <button onClick={() => setActiveFilter("favorites")} style={{
-                      padding: "7px 16px",
-                      background: activeFilter === "favorites" ? "linear-gradient(135deg, #2d2a26, #3d3832)" : "rgba(255,255,255,0.5)",
-                      color: activeFilter === "favorites" ? "#faf8f5" : "#8a827a",
-                      border: activeFilter === "favorites" ? "none" : "1px solid rgba(0,0,0,0.05)",
-                      borderRadius: "20px", fontFamily: "'DM Sans', sans-serif",
-                      fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                      transition: "all 0.25s ease",
-                    }}>♡ favorites</button>
-                    <div style={{ position: "relative" }}>
-                      <select
-                        value={activeFilter !== "all" && activeFilter !== "favorites" ? activeFilter : ""}
-                        onChange={(e) => setActiveFilter(e.target.value || "all")}
-                        style={{
-                          padding: "7px 32px 7px 14px",
-                          background: (activeFilter !== "all" && activeFilter !== "favorites")
-                            ? "linear-gradient(135deg, #2d2a26, #3d3832)" : "rgba(255,255,255,0.5)",
-                          color: (activeFilter !== "all" && activeFilter !== "favorites") ? "#faf8f5" : "#8a827a",
-                          border: (activeFilter !== "all" && activeFilter !== "favorites") ? "none" : "1px solid rgba(0,0,0,0.05)",
-                          borderRadius: "20px", fontFamily: "'DM Sans', sans-serif",
-                          fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                          appearance: "none", WebkitAppearance: "none",
-                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%238a827a' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`,
-                          backgroundRepeat: "no-repeat",
-                          backgroundPosition: "right 12px center",
-                          outline: "none",
-                        }}
-                      >
-                        <option value="">filter by tag...</option>
-                        {allTags.sort().map((tag) => (
-                          <option key={tag} value={tag}>{tag}</option>
-                        ))}
-                      </select>
-                    </div>
+                  <div style={{ display: "flex", gap: "6px", marginTop: "14px", flexWrap: "wrap" }}>
+                    {["all", "favorites", ...allTags.sort()].map((f) => (
+                      <button key={f} onClick={() => setActiveFilter(f)} style={{
+                        padding: "7px 16px",
+                        background: activeFilter === f ? "linear-gradient(135deg, #2d2a26, #3d3832)" : "rgba(255,255,255,0.5)",
+                        color: activeFilter === f ? "#faf8f5" : "#8a827a",
+                        border: activeFilter === f ? "none" : "1px solid rgba(0,0,0,0.05)",
+                        borderRadius: "20px", fontFamily: "'DM Sans', sans-serif",
+                        fontSize: "13px", fontWeight: 500, cursor: "pointer",
+                        transition: "all 0.25s ease", textTransform: "capitalize",
+                      }}>{f === "favorites" ? "♡ favorites" : f}</button>
+                    ))}
                   </div>
                 )}
               </div>
