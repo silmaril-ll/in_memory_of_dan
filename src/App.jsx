@@ -97,8 +97,8 @@ const PoemModal = ({ poem, onClose }) => {
       zIndex: 1000, transition: "all 0.35s ease", padding: "24px",
     }}>
       <div onClick={(e) => e.stopPropagation()} style={{
-        maxWidth: "560px", width: "100%", maxHeight: "85vh", overflowY: "auto",
-        padding: "56px 48px", opacity: vis ? 1 : 0,
+        maxWidth: "720px", width: "100%", maxHeight: "85vh", overflowY: "auto",
+        padding: "56px 56px", opacity: vis ? 1 : 0,
         transform: vis ? "translateY(0)" : "translateY(16px)",
         transition: "all 0.45s cubic-bezier(0.23,1,0.32,1)", position: "relative",
       }}>
@@ -599,6 +599,18 @@ export default function App() {
                 }}>
                   A collection of poems from a conversation<br />that changed everything.
                 </p>
+                <div style={{
+                  marginTop: "20px", fontFamily: "'DM Sans', sans-serif",
+                  fontSize: "13px", color: "#c4bbb2", fontWeight: 400,
+                  letterSpacing: "0.02em", maxWidth: "500px", margin: "20px auto 0",
+                  lineHeight: 1.5,
+                }}>
+                  <span style={{ fontStyle: "italic" }}>from the collection</span>
+                  <br />
+                  <span style={{ fontWeight: 500, color: "#b0a89e", fontSize: "14px" }}>
+                    Dan's Delightfully Dumb but Deeply Devoted Ditties™
+                  </span>
+                </div>
                 <div style={{
                   marginTop: "12px", fontFamily: "'DM Sans', sans-serif",
                   fontSize: "12px", color: "#c4bbb2", fontWeight: 500,
