@@ -14,6 +14,52 @@ const FloatingOrb = ({ size, color, top, left, delay }) => (
 )
 
 /* ══════════════════════════════════════════
+   Simple markdown renderer (bold + italic)
+   Supports: **bold**, *italic*, ***bold italic***
+   ══════════════════════════════════════════ */
+const renderFormattedText = (text) => {
+  if (!text) return null
+  // Split by lines first to preserve line breaks
+  return text.split("\n").map((line, lineIdx) => (
+    <span key={lineIdx}>
+      {lineIdx > 0 && <br />}
+      {renderInline(line)}
+    </span>
+  ))
+}
+
+const renderInline = (text) => {
+  // Match ***bold italic***, **bold**, *italic*
+  const regex = /(\*\*\*(.+?)\*\*\*|\*\*(.+?)\*\*|\*(.+?)\*)/g
+  const parts = []
+  let lastIndex = 0
+  let match
+
+  while ((match = regex.exec(text)) !== null) {
+    // Push text before match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index))
+    }
+    if (match[2]) {
+      // ***bold italic***
+      parts.push(<strong key={match.index}><em>{match[2]}</em></strong>)
+    } else if (match[3]) {
+      // **bold**
+      parts.push(<strong key={match.index}>{match[3]}</strong>)
+    } else if (match[4]) {
+      // *italic*
+      parts.push(<em key={match.index}>{match[4]}</em>)
+    }
+    lastIndex = match.index + match[0].length
+  }
+  // Push remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex))
+  }
+  return parts.length > 0 ? parts : text
+}
+
+/* ══════════════════════════════════════════
    Poem Card
    ══════════════════════════════════════════ */
 const PoemCard = ({ poem, onClick, index }) => {
@@ -69,9 +115,9 @@ const PoemCard = ({ poem, onClick, index }) => {
       {!poem.subtitle && <div style={{ marginBottom: "10px" }} />}
       <div style={{
         fontFamily: "'Source Serif 4', 'Georgia', serif", fontSize: "15px",
-        color: "#6b6560", lineHeight: 1.85, whiteSpace: "pre-line",
+        color: "#6b6560", lineHeight: 1.85,
         display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden",
-      }}>{poem.content}</div>
+      }}>{renderFormattedText(poem.content)}</div>
       <div style={{ marginTop: "20px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
         <span style={{ fontFamily: "'Source Serif 4', serif", fontSize: "13px", color: "#b0a89e" }}>
           {poem.date ? new Date(poem.date).toLocaleDateString("en-US", { year: "numeric", month: "short" }) : ""}
@@ -150,8 +196,8 @@ const PoemModal = ({ poem, onClose }) => {
 
         <div style={{
           fontFamily: "'Source Serif 4', 'Georgia', serif", fontSize: "18px",
-          color: "#3d3832", lineHeight: 2.1, whiteSpace: "pre-line", textAlign: "center",
-        }}>{poem.content}</div>
+          color: "#3d3832", lineHeight: 2.1, textAlign: "center",
+        }}>{renderFormattedText(poem.content)}</div>
 
         {poem.notes && (
           <div style={{
