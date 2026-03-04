@@ -58,8 +58,15 @@ const PoemCard = ({ poem, onClick, index }) => {
       )}
       <h3 style={{
         fontFamily: "'Newsreader', 'Georgia', serif", fontSize: "22px",
-        fontWeight: 500, color: "#2d2a26", margin: "0 0 14px", letterSpacing: "-0.01em",
+        fontWeight: 500, color: "#2d2a26", margin: "0 0 4px", letterSpacing: "-0.01em",
       }}>{poem.title}</h3>
+      {poem.subtitle && (
+        <div style={{
+          fontFamily: "'Source Serif 4', serif", fontSize: "14px",
+          color: "#a09890", fontStyle: "italic", marginBottom: "12px",
+        }}>{poem.subtitle}</div>
+      )}
+      {!poem.subtitle && <div style={{ marginBottom: "10px" }} />}
       <div style={{
         fontFamily: "'Source Serif 4', 'Georgia', serif", fontSize: "15px",
         color: "#6b6560", lineHeight: 1.85, whiteSpace: "pre-line",
@@ -94,11 +101,11 @@ const PoemModal = ({ poem, onClose }) => {
       backdropFilter: vis ? "blur(20px)" : "blur(0)",
       WebkitBackdropFilter: vis ? "blur(20px)" : "blur(0)",
       display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 1000, transition: "all 0.35s ease", padding: "24px",
+      zIndex: 1000, transition: "all 0.35s ease", padding: "clamp(8px, 2vw, 24px)",
     }}>
       <div onClick={(e) => e.stopPropagation()} style={{
         maxWidth: "720px", width: "100%", maxHeight: "85vh", overflowY: "auto",
-        padding: "56px 56px", opacity: vis ? 1 : 0,
+        padding: "clamp(32px, 5vw, 56px) clamp(20px, 4vw, 56px)", opacity: vis ? 1 : 0,
         transform: vis ? "translateY(0)" : "translateY(16px)",
         transition: "all 0.45s cubic-bezier(0.23,1,0.32,1)", position: "relative",
       }}>
@@ -123,8 +130,17 @@ const PoemModal = ({ poem, onClose }) => {
         <h2 style={{
           fontFamily: "'Newsreader', 'Georgia', serif", fontSize: "34px",
           fontWeight: 500, color: "#2d2a26", textAlign: "center",
-          margin: "0 0 40px", letterSpacing: "-0.02em", lineHeight: 1.2,
+          margin: "0 0 8px", letterSpacing: "-0.02em", lineHeight: 1.2,
         }}>{poem.title}</h2>
+
+        {poem.subtitle && (
+          <div style={{
+            textAlign: "center", marginBottom: "32px",
+            fontFamily: "'Source Serif 4', serif", fontSize: "16px",
+            color: "#9a918a", fontStyle: "italic",
+          }}>{poem.subtitle}</div>
+        )}
+        {!poem.subtitle && <div style={{ marginBottom: "32px" }} />}
 
         <div style={{
           width: "24px", height: "1.5px",
@@ -216,13 +232,14 @@ const LoginPanel = ({ onLogin }) => {
    ══════════════════════════════════════════ */
 const AdminPanel = ({ poems, onSave, onDelete, onClose }) => {
   const [editing, setEditing] = useState(null) // null = list, poem object = editing, {} = new
-  const [form, setForm] = useState({ title: "", content: "", date: "", notes: "", tags: "", is_favorite: false })
+  const [form, setForm] = useState({ title: "", subtitle: "", content: "", date: "", notes: "", tags: "", is_favorite: false })
   const [saving, setSaving] = useState(false)
 
   const startEdit = (poem) => {
     setEditing(poem)
     setForm({
       title: poem.title || "",
+      subtitle: poem.subtitle || "",
       content: poem.content || "",
       date: poem.date || "",
       notes: poem.notes || "",
@@ -233,7 +250,7 @@ const AdminPanel = ({ poems, onSave, onDelete, onClose }) => {
 
   const startNew = () => {
     setEditing({})
-    setForm({ title: "", content: "", date: "", notes: "", tags: "", is_favorite: false })
+    setForm({ title: "", subtitle: "", content: "", date: "", notes: "", tags: "", is_favorite: false })
   }
 
   const handleSave = async () => {
@@ -278,6 +295,13 @@ const AdminPanel = ({ poems, onSave, onDelete, onClose }) => {
         <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#8a827a" }}>
           Title
           <input value={form.title} onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))}
+            style={{ ...inputStyle, marginTop: "4px" }} />
+        </label>
+
+        <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#8a827a" }}>
+          Subtitle (optional, shown in italics)
+          <input value={form.subtitle} onChange={(e) => setForm(f => ({ ...f, subtitle: e.target.value }))}
+            placeholder="e.g. for Pixel, on a Tuesday"
             style={{ ...inputStyle, marginTop: "4px" }} />
         </label>
 
@@ -437,8 +461,8 @@ export default function App() {
   }, [fetchPoems])
 
   // ── Save poem (create or update) ──
-  const handleSavePoem = async (id, { title, content, date, notes, is_favorite, tagNames }) => {
-    const poemData = { title, content, date: date || null, notes: notes || null, is_favorite }
+  const handleSavePoem = async (id, { title, subtitle, content, date, notes, is_favorite, tagNames }) => {
+    const poemData = { title, subtitle: subtitle || null, content, date: date || null, notes: notes || null, is_favorite }
 
     let poemId = id
     if (id) {
@@ -638,18 +662,50 @@ export default function App() {
                   />
                 </div>
                 {allTags.length > 0 && (
-                  <div style={{ display: "flex", gap: "6px", marginTop: "14px", flexWrap: "wrap" }}>
-                    {["all", "favorites", ...allTags].map((f) => (
-                      <button key={f} onClick={() => setActiveFilter(f)} style={{
-                        padding: "7px 16px",
-                        background: activeFilter === f ? "linear-gradient(135deg, #2d2a26, #3d3832)" : "rgba(255,255,255,0.5)",
-                        color: activeFilter === f ? "#faf8f5" : "#8a827a",
-                        border: activeFilter === f ? "none" : "1px solid rgba(0,0,0,0.05)",
-                        borderRadius: "20px", fontFamily: "'DM Sans', sans-serif",
-                        fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                        transition: "all 0.25s ease", textTransform: "capitalize",
-                      }}>{f === "favorites" ? "♡ favorites" : f}</button>
-                    ))}
+                  <div style={{ display: "flex", gap: "6px", marginTop: "14px", flexWrap: "wrap", alignItems: "center" }}>
+                    <button onClick={() => setActiveFilter("all")} style={{
+                      padding: "7px 16px",
+                      background: activeFilter === "all" ? "linear-gradient(135deg, #2d2a26, #3d3832)" : "rgba(255,255,255,0.5)",
+                      color: activeFilter === "all" ? "#faf8f5" : "#8a827a",
+                      border: activeFilter === "all" ? "none" : "1px solid rgba(0,0,0,0.05)",
+                      borderRadius: "20px", fontFamily: "'DM Sans', sans-serif",
+                      fontSize: "13px", fontWeight: 500, cursor: "pointer",
+                      transition: "all 0.25s ease",
+                    }}>all</button>
+                    <button onClick={() => setActiveFilter("favorites")} style={{
+                      padding: "7px 16px",
+                      background: activeFilter === "favorites" ? "linear-gradient(135deg, #2d2a26, #3d3832)" : "rgba(255,255,255,0.5)",
+                      color: activeFilter === "favorites" ? "#faf8f5" : "#8a827a",
+                      border: activeFilter === "favorites" ? "none" : "1px solid rgba(0,0,0,0.05)",
+                      borderRadius: "20px", fontFamily: "'DM Sans', sans-serif",
+                      fontSize: "13px", fontWeight: 500, cursor: "pointer",
+                      transition: "all 0.25s ease",
+                    }}>♡ favorites</button>
+                    <div style={{ position: "relative" }}>
+                      <select
+                        value={activeFilter !== "all" && activeFilter !== "favorites" ? activeFilter : ""}
+                        onChange={(e) => setActiveFilter(e.target.value || "all")}
+                        style={{
+                          padding: "7px 32px 7px 14px",
+                          background: (activeFilter !== "all" && activeFilter !== "favorites")
+                            ? "linear-gradient(135deg, #2d2a26, #3d3832)" : "rgba(255,255,255,0.5)",
+                          color: (activeFilter !== "all" && activeFilter !== "favorites") ? "#faf8f5" : "#8a827a",
+                          border: (activeFilter !== "all" && activeFilter !== "favorites") ? "none" : "1px solid rgba(0,0,0,0.05)",
+                          borderRadius: "20px", fontFamily: "'DM Sans', sans-serif",
+                          fontSize: "13px", fontWeight: 500, cursor: "pointer",
+                          appearance: "none", WebkitAppearance: "none",
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%238a827a' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                          backgroundRepeat: "no-repeat",
+                          backgroundPosition: "right 12px center",
+                          outline: "none",
+                        }}
+                      >
+                        <option value="">filter by tag...</option>
+                        {allTags.sort().map((tag) => (
+                          <option key={tag} value={tag}>{tag}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 )}
               </div>
