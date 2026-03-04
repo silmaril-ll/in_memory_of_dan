@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { supabase } from "./lib/supabase"
 
 /* ══════════════════════════════════════════
@@ -136,33 +136,66 @@ const PoemCard = ({ poem, onClick, index }) => {
    ══════════════════════════════════════════ */
 const PoemModal = ({ poem, onClose }) => {
   const [vis, setVis] = useState(false)
+  const touchRef = useRef(null)
+
   useEffect(() => { requestAnimationFrame(() => setVis(true)) }, [])
   const close = () => { setVis(false); setTimeout(onClose, 350) }
   const tags = poem.tags || []
 
-  return (
-    <div onClick={close} style={{
-      position: "fixed", inset: 0,
-      background: vis ? "rgba(255,252,248,0.85)" : "rgba(255,252,248,0)",
-      backdropFilter: vis ? "blur(20px)" : "blur(0)",
-      WebkitBackdropFilter: vis ? "blur(20px)" : "blur(0)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 1000, transition: "all 0.35s ease", padding: "clamp(8px, 2vw, 24px)",
-    }}>
-      <div onClick={(e) => e.stopPropagation()} style={{
-        maxWidth: "720px", width: "100%", maxHeight: "85vh", overflowY: "auto",
-        padding: "clamp(32px, 5vw, 56px) clamp(20px, 4vw, 56px)", opacity: vis ? 1 : 0,
-        transform: vis ? "translateY(0)" : "translateY(16px)",
-        transition: "all 0.45s cubic-bezier(0.23,1,0.32,1)", position: "relative",
-      }}>
-        <button onClick={close} style={{
-          position: "absolute", top: 12, right: 12,
-          background: "rgba(0,0,0,0.04)", border: "none",
-          width: 36, height: 36, borderRadius: "50%", cursor: "pointer",
-          fontSize: "18px", color: "#b0a89e",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>×</button>
+  // Swipe right to close
+  const handleTouchStart = (e) => {
+    touchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  }
+  const handleTouchEnd = (e) => {
+    if (!touchRef.current) return
+    const dx = e.changedTouches[0].clientX - touchRef.current.x
+    const dy = Math.abs(e.changedTouches[0].clientY - touchRef.current.y)
+    // Right swipe: horizontal distance > 80px, and more horizontal than vertical
+    if (dx > 80 && dx > dy * 1.5) close()
+    touchRef.current = null
+  }
 
+  return (
+    <div
+      onClick={close}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      style={{
+        position: "fixed", inset: 0,
+        background: vis ? "rgba(255,252,248,0.85)" : "rgba(255,252,248,0)",
+        backdropFilter: vis ? "blur(20px)" : "blur(0)",
+        WebkitBackdropFilter: vis ? "blur(20px)" : "blur(0)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 1000, transition: "all 0.35s ease",
+        padding: "clamp(8px, 2vw, 24px)",
+      }}
+    >
+      {/* Fixed close button - always visible */}
+      <button onClick={close} style={{
+        position: "fixed", top: "clamp(12px, 2vw, 20px)", right: "clamp(12px, 2vw, 20px)",
+        background: "rgba(0,0,0,0.06)", border: "none",
+        width: 40, height: 40, borderRadius: "50%", cursor: "pointer",
+        fontSize: "20px", color: "#8a827a", zIndex: 1001,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+        transition: "background 0.2s",
+      }}
+        onMouseEnter={(e) => e.currentTarget.style.background = "rgba(0,0,0,0.12)"}
+        onMouseLeave={(e) => e.currentTarget.style.background = "rgba(0,0,0,0.06)"}
+      >×</button>
+
+      {/* Scrollable content */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: "720px", width: "100%", maxHeight: "85vh", overflowY: "auto",
+          padding: "clamp(32px, 5vw, 56px) clamp(20px, 4vw, 56px)",
+          paddingTop: "clamp(24px, 4vw, 56px)",
+          opacity: vis ? 1 : 0,
+          transform: vis ? "translateY(0)" : "translateY(16px)",
+          transition: "all 0.45s cubic-bezier(0.23,1,0.32,1)",
+        }}
+      >
         <div style={{
           textAlign: "center", marginBottom: "6px",
           fontFamily: "'DM Sans', sans-serif", fontSize: "12px", fontWeight: 500,
@@ -174,7 +207,8 @@ const PoemModal = ({ poem, onClose }) => {
         </div>
 
         <h2 style={{
-          fontFamily: "'Newsreader', 'Georgia', serif", fontSize: "34px",
+          fontFamily: "'Newsreader', 'Georgia', serif",
+          fontSize: "clamp(26px, 5vw, 34px)",
           fontWeight: 500, color: "#2d2a26", textAlign: "center",
           margin: "0 0 8px", letterSpacing: "-0.02em", lineHeight: 1.2,
         }}>{poem.title}</h2>
@@ -182,7 +216,8 @@ const PoemModal = ({ poem, onClose }) => {
         {poem.subtitle && (
           <div style={{
             textAlign: "center", marginBottom: "32px",
-            fontFamily: "'Source Serif 4', serif", fontSize: "16px",
+            fontFamily: "'Source Serif 4', serif",
+            fontSize: "clamp(14px, 2.5vw, 16px)",
             color: "#9a918a", fontStyle: "italic",
           }}>{poem.subtitle}</div>
         )}
@@ -195,7 +230,8 @@ const PoemModal = ({ poem, onClose }) => {
         }} />
 
         <div style={{
-          fontFamily: "'Source Serif 4', 'Georgia', serif", fontSize: "18px",
+          fontFamily: "'Source Serif 4', 'Georgia', serif",
+          fontSize: "clamp(15px, 2.8vw, 18px)",
           color: "#3d3832", lineHeight: 2.1, textAlign: "center",
         }}>{renderFormattedText(poem.content)}</div>
 
